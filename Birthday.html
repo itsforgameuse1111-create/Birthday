@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday Meena Devi</title>
+<style>
+  * {margin:0; padding:0; box-sizing:border-box;}
+  body {
+    height:100vh;
+    width:100vw;
+    overflow:hidden;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:url('background.jpg') center/cover no-repeat;
+    font-family:'Comic Sans MS', cursive, sans-serif;
+    color:white;
+    text-shadow:0 0 10px #000;
+    position:relative;
+  }
+  #overlay {
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.4);
+    z-index:0;
+  }
+  h1 {
+    position:absolute;
+    top:10%;
+    width:100%;
+    text-align:center;
+    font-size:2.5rem;
+    animation:glow 2s infinite alternate;
+    z-index:1;
+  }
+  @keyframes glow {
+    from {text-shadow:0 0 10px #ff0,0 0 20px #f0f;}
+    to   {text-shadow:0 0 20px #0ff,0 0 40px #ff0;}
+  }
+  #wishBtn {
+    padding:20px 40px;
+    font-size:1.5rem;
+    border:none;
+    border-radius:50px;
+    background:linear-gradient(45deg,#ff4ec4,#ffa500);
+    cursor:pointer;
+    z-index:2;
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+  }
+  #wishText {
+    position:absolute;
+    bottom:10%;
+    width:90%;
+    text-align:center;
+    font-size:1.5rem;
+    font-weight:bold;
+    opacity:0;
+    transition: opacity 1s ease;
+    z-index:2;
+  }
+  canvas {
+    position:fixed;
+    top:0; left:0;
+    pointer-events:none;
+    z-index:0;
+  }
+</style>
+</head>
+<body>
+<div id="overlay"></div>
+<h1>🎉 Happy Birthday Meena Devi 🎂</h1>
+<button id="wishBtn">Tap to Celebrate!</button>
+<div id="wishText"></div>
+<audio id="music" loop>
+  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+</audio>
+<canvas id="canvas"></canvas>
+
+<script>
+const wishes=[
+  "Wishing you endless joy and laughter! 🎈",
+  "May all your dreams come true today! ✨",
+  "Cheers to another year of awesomeness! 🥂",
+  "Stay fabulous, Meena Devi! 💖",
+  "Hope your day is as amazing as you are! 🌟"
+];
+
+const btn = document.getElementById('wishBtn');
+const text = document.getElementById('wishText');
+const music = document.getElementById('music');
+
+btn.addEventListener('click', () => {
+  if (music.paused) music.play();
+  showWish();
+  launchConfetti();
+  launchFireworks();
+});
+
+function showWish(){
+  text.textContent = wishes[Math.floor(Math.random() * wishes.length)];
+  text.style.opacity = 1;
+  setTimeout(() => text.style.opacity = 0, 4000);
+}
+
+// ------------------- Canvas Animations -------------------
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let fireworks = [];
+
+function resize(){canvas.width = window.innerWidth; canvas.height = window.innerHeight;}
+window.addEventListener('resize', resize);
+resize();
+
+// ----- Confetti -----
+function launchConfetti(){
+  for(let i=0;i<100;i++){
+    particles.push({
+      x:Math.random()*canvas.width,
+      y:Math.random()*canvas.height - canvas.height,
+      r:Math.random()*6+2,
+      c:`hsl(${Math.random()*360},100%,50%)`,
+      s:Math.random()*3+2,
+      gravity:0.3,
+      vy:Math.random()*2+2,
+      vx:(Math.random()-0.5)*5,
+      bounce:0.7
+    });
+  }
+}
+
+// ----- Fireworks -----
+function launchFireworks(){
+  const x = Math.random()*canvas.width*0.8 + canvas.width*0.1;
+  const y = Math.random()*canvas.height*0.5 + canvas.height*0.1;
+  const hue = Math.random()*360;
+  for(let i=0;i<50;i++){
+    fireworks.push({
+      x:x,
+      y:y,
+      r:Math.random()*3+1,
+      c:`hsl(${hue},100%,50%)`,
+      vx:(Math.random()-0.5)*8,
+      vy:(Math.random()-0.5)*8,
+      alpha:1,
+      fade:Math.random()*0.02+0.01
+    });
+  }
+}
+
+// ----- Draw loop -----
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // Confetti
+  particles.forEach((p,i)=>{
+    p.vy += p.gravity * 0.1;
+    p.x += p.vx;
+    p.y += p.vy;
+    if(p.y + p.r > canvas.height){
+      p.y = canvas.height - p.r;
+      p.vy *= -p.bounce;
+    }
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=p.c;
+    ctx.fill();
+  });
+
+  // Fireworks
+  fireworks.forEach((f,i)=>{
+    f.x += f.vx;
+    f.y += f.vy;
+    f.alpha -= f.fade;
+    if(f.alpha <= 0) fireworks.splice(i,1);
+    ctx.beginPath();
+    ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
+    ctx.fillStyle = `hsla(${f.c},${f.alpha})`;
+    ctx.fill();
+  });
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
